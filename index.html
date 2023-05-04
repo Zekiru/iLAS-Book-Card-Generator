@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Book Card Generator</title>
+    
+    <link rel="icon" href="Assets/fav_new.png" type="image/gif" sizes="16x16">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="top-menu">
+        <div class="main-section">
+            <h3>Book Card Generator</h3>
+            <button type="button" class="extract-button" onclick="fetchRemoteData()">Refresh</button>
+        </div>
+        <div class="sub-section">
+            <button type="button" id="generate-button" onclick="generatePDF()" disabled>Generate Book Card/s<br>(13 MAX)</button>
+        </div>
+    </div>
+
+    <div class="selection-container">
+        <div class="selection-content data-table">
+            <div class="selection-header">
+                <input type="text" id="search-bar" placeholder="Search...">
+                <div id="dataPagination" class="pagination"></div>
+            </div>
+            <div id="dataScroll" class="table-scroll">
+                <table id="acDataTable"></table>
+            </div>
+        </div>
+        <div class="selection-content select-table">
+            <div class="table-scroll">
+                <table id="selectedTable"></table>
+            </div>
+        </div>
+    </div>
+
+    <div class="preview-container">
+        <div class="preview-bar">
+            <h3>Preview</h4>
+        </div>
+        <div class="preview-scroll">
+            <div id="bookCardFormat"></div>
+        </div>
+    </div>
+
+    <div id="loading-screen">
+        <div>Loading...</div>
+    </div>
+
+    <script src="html2pdf.bundle.min.js"></script>
+
+    <script src="main.js"></script>
+</body>
+
+</html>
