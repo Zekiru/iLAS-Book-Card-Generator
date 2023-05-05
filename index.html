@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Book Card Generator</title>
+    <title>iLAS - Book Card Generator</title>
     
     <link rel="icon" href="Assets/fav_new.png" type="image/gif" sizes="16x16">
 
@@ -14,11 +14,17 @@
 <body>
     <div class="top-menu">
         <div class="main-section">
-            <h3>Book Card Generator</h3>
-            <button type="button" class="extract-button" onclick="fetchRemoteData()">Refresh</button>
+            <h3>
+                <a target="_blank" href="https://docs.google.com/document/d/10ElpvYWxPXgLmujxy7auVcAv334YMklTJ70l3Kua_Nw/edit?usp=sharing">iLAS - Book Card Generator</a>
+            </h3>
+
+            <input type="file" id="file-upload">
+            <button type="button" id="upload-button" class="upload-button" onclick="fetchUploadedData()" disabled>Upload TSV</button>
+            
+            <button type="button" class="extract-button" onclick="fetchRemoteData()">Load Accession Record Data</button>
         </div>
         <div class="sub-section">
-            <button type="button" id="generate-button" onclick="generatePDF()" disabled>Generate Book Card/s<br>(13 MAX)</button>
+            <button type="button" id="generate-button" onclick="generatePDF()" disabled>Generate Book Card/s</button>
         </div>
     </div>
 

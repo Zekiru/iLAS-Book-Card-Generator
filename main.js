@@ -1,4 +1,5 @@
-let link = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQgY-FvvB8oIrqCVdtgbV1no7_KZnFY-KCPzOvvZpX1Mtn3fs595hU24BH9CandhQ/pub?gid=1587574773&single=true&output=tsv";
+// Link to extract TSV Data from the Accession Record Spreadsheet:
+let link = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQgY-FvvB8oIrqCVdtgbV1no7_KZnFY-KCPzOvvZpX1Mtn3fs595hU24BH9CandhQ/pub?gid=1587574773&single=true&output=tsv"; // UNOFFICIAL COPY
 
 const loadingScreen = document.getElementById('loading-screen');
 
@@ -13,6 +14,9 @@ let dataHeaders = ['ACC NO', 'CALL NO', 'AUTHOR', 'TITLE'];
 let bookObjects = [];
 let currentBookObjects = [];
 let currentBookSelect = [];
+
+
+const maxPages = 12;
 
 
 let selectMode = true;
@@ -43,15 +47,8 @@ searchInput.addEventListener('input', function() {
     loadTable(new Pagination(searchFilter, 200).getCurrentItems(1));
 });
 
-window.onload = function() {
-    // loadingScreen.style.display = 'none';
-};
-
 document.addEventListener('DOMContentLoaded', () => {
-    // Disabled for Static Preview:
-    // fetchRemoteData();
-
-    // Using Local Data for now:
+    // Starting Local Fetch Prompt:
     fetchLocalData();
 });
 
@@ -110,7 +107,11 @@ class Book {
     }
 
     toggleSelect(active) {
-        if (active && !currentBookSelect.includes(this) && currentBookSelect.length < 13) {
+        if (active && !currentBookSelect.includes(this) && currentBookSelect.length < maxPages) {
+            if (currentBookSelect.length == 0) {
+                loadBackPage(true);
+            }
+
             this.selected = active;
 
             this.toggleDataTable(active);
@@ -148,6 +149,10 @@ class Book {
             selectTable.removeChild(document.getElementById(this.id));
 
             document.getElementById('bookCardFormat').removeChild(document.getElementById(this.data[dataHeaders[0]]));
+
+            if (currentBookSelect.length == 0) {
+                loadBackPage(false);
+            }
         }
 
         /* // Sorted Selected Table (Slow Performance):
@@ -169,7 +174,7 @@ class Book {
             selectTable.appendChild(tr);
         }); */
 
-        if (currentBookSelect.length == 0 || currentBookSelect.length > 13) {
+        if (currentBookSelect.length == 0 || currentBookSelect.length > maxPages) {
             generateButton.setAttribute('disabled', '');
         } else if (generateButton.hasAttribute('disabled')) {
             generateButton.removeAttribute('disabled')
@@ -297,7 +302,7 @@ function selectAll(change) {
     })
 
     if (!change) {
-        if (currentBookSelect.length >= 13) {
+        if (currentBookSelect.length >= maxPages) {
             cb.setAttribute("checked", "");
             return;
         }
@@ -311,7 +316,7 @@ function selectAll(change) {
         return;
     }
 
-    if (allSelect && currentBookSelect.length < 13) {
+    if (allSelect && currentBookSelect.length < maxPages) {
         cb.setAttribute("checked", "");
 
         currentBookObjects.forEach((book) => {
@@ -354,13 +359,13 @@ async function fetchLocalData() {
 
         bookObjects = bookObjects.sort(function(a, b){return a.id - b.id});
 
-        // booksPaginated = new Pagination(bookObjects, 200);
-
         loadTable(new Pagination(bookObjects, 200).getCurrentItems(1));
     })
     .catch(error => {
         fetchError("Local", error);
     });
+
+    document.getElementById('search-bar').value = '';
 
     loadingScreen.style.display = 'none';
 }
@@ -402,6 +407,49 @@ async function fetchRemoteData() {
     loadingScreen.style.display = 'none';
 }
 
+function fetchUploadedData() {
+    const fileUpload = document.getElementById('file-upload');
+    
+    const file = fileUpload.files[0];
+
+    if (fileUpload && fileUpload.value) {
+        console.log(`Uploading file: ${file.name}`);
+
+        const reader = new FileReader();
+
+        reader.onload = function(event) {
+            const contents = event.target.result;
+        
+            const json = tsvToJSON(contents);
+
+            if (!Object.keys(json[0]).includes(dataHeaders[0])) {
+                fetchError("Remote", "Unreadable Data.");
+                return;
+            };
+        
+            try {
+                let xhr = new XMLHttpRequest();
+                xhr.open('POST', 'write.php');
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.onload = () => {
+                    if (xhr.status === 200) {
+                        fetchLocalData();
+                        console.log(xhr.responseText);
+                    } else {
+                        console.log('PHP: Request failed.  Returned status of ' + xhr.status);
+                    }
+                };
+                xhr.send(JSON.stringify(json));
+            } catch (error) {
+                fetchError("Remote", "XMLHttp Request Error.");
+            }
+        };
+        reader.readAsText(file);
+    } else {
+        console.log('No file has been uploaded.');
+    }
+}
+
 function fetchError(type, error) {
     console.log(type + " Data Fetch Error: " + error);
     
@@ -432,7 +480,7 @@ function tsvToJSON(tsv) {
 }
 
 async function generatePDF() {
-    // if (currentBookSelect.length == 0 || currentBookSelect.length > 13) {return;}
+    if (currentBookSelect.length == 0 || currentBookSelect.length > maxPages) {return}
 
     const element = document.getElementById('bookCardFormat');
     
@@ -542,8 +590,12 @@ function loadBookCard(book) {
     const trHeaders = document.createElement('tr');
 
     const th1 = document.createElement('th');
+    th1.setAttribute('class', 'date');
     const th2 = document.createElement('th');
+    th2.setAttribute('class', 'name');
     const th3 = document.createElement('th');
+    th3.setAttribute('class', 'level');
+
     th1.innerText = 'DATE';
     th2.innerText = 'NAME';
     th3.innerText = 'LEVEL';
@@ -597,4 +649,96 @@ function loadBookCard(book) {
         const rowsToRemove = Array.from(table.rows).slice(numRows);
         rowsToRemove.forEach(row => row.remove());
     }
+}
+
+function loadBackPage(active) {
+    if (active) {
+        const bookCardFormat = document.getElementById('bookCardFormat');
+
+        const page = document.createElement('section');
+        page.setAttribute('class', 'page');
+        page.setAttribute('id', 'back-page');
+
+        const pageContent = document.createElement('div');
+        pageContent.setAttribute('class', 'page-content');
+
+
+        const tableContainer = document.createElement('div');
+        const table = document.createElement('table');
+        const trHeaders = document.createElement('tr');
+
+        const th1 = document.createElement('th');
+        th1.setAttribute('class', 'date');
+        const th2 = document.createElement('th');
+        th2.setAttribute('class', 'name');
+        const th3 = document.createElement('th');
+        th3.setAttribute('class', 'level');
+
+        th1.innerText = 'DATE';
+        th2.innerText = 'NAME';
+        th3.innerText = 'LEVEL';
+        
+        trHeaders.appendChild(th1);
+        trHeaders.appendChild(th2);
+        trHeaders.appendChild(th3);
+
+        table.appendChild(trHeaders);
+
+        const trCount = 40;
+        
+        for (let i = 0; trCount > i; i++) {
+            const tr = document.createElement('tr');
+
+            for (let i = 0; 3 > i; i++) {
+                const td = document.createElement('td');
+                tr.appendChild(td);
+            }
+
+            table.appendChild(tr);
+        }
+
+        tableContainer.appendChild(table);
+
+        pageContent.appendChild(tableContainer);
+
+        page.appendChild(pageContent);
+
+        bookCardFormat.insertBefore(page, bookCardFormat.firstChild);
+
+
+
+        const tableHeight = table.offsetHeight;
+        const containerHeight = page.offsetHeight - (page.offsetHeight * 0.1);
+
+        if (tableHeight > containerHeight) {
+            // calculate how many rows have overflowed
+            const rowHeight = table.querySelector('tr').offsetHeight;
+            const numRows = Math.floor(containerHeight / rowHeight);
+            
+            // remove the overflowing rows
+            const rowsToRemove = Array.from(table.rows).slice(numRows);
+            rowsToRemove.forEach(row => row.remove());
+        }
+    } else {
+        document.getElementById('back-page').remove();
+    }
+}
+
+
+const currentUrl = window.location.href;
+
+const adminInput = document.getElementById('file-upload');
+const adminButton = document.getElementById('upload-button');
+
+if (currentUrl.includes('MgHiUF8lqrI7hrcHk2PIlskBnEuQMM4BEZh4lzSdd4w=')) {
+    adminInput.addEventListener('input', function() {
+        if (adminInput.value.trim() === '') {
+            adminButton.disabled = true;
+        } else {
+            adminButton.disabled = false;
+        }
+    });
+} else {
+    adminInput.remove();
+    adminButton.remove();
 }
