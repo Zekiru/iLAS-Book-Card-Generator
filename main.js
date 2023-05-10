@@ -1,5 +1,5 @@
 // Link to extract TSV Data from the Accession Record Spreadsheet:
-let link = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQgY-FvvB8oIrqCVdtgbV1no7_KZnFY-KCPzOvvZpX1Mtn3fs595hU24BH9CandhQ/pub?gid=1587574773&single=true&output=tsv"; // UNOFFICIAL COPY
+let link = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQmt-87iRLXJNLyqg8B-3yjFRU84N2MxI3ekjSW3cn8JiR7E27gXrfalm8kmF__LQ/pub?gid=1587574773&single=true&output=tsv";
 
 const loadingScreen = document.getElementById('loading-screen');
 
@@ -10,7 +10,7 @@ const dataPagination = document.getElementById('dataPagination');
 const selectPagination = document.getElementById('selectedPagination');
 const searchInput = document.getElementById('search-bar');
 
-let dataHeaders = ['ACC NO', 'CALL NO', 'AUTHOR', 'TITLE'];
+let dataHeaders = ['Acession number', 'Class', 'Author', 'Title of the Book'];
 let bookObjects = [];
 let currentBookObjects = [];
 let currentBookSelect = [];
