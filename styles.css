@@ -316,8 +316,8 @@ tr:hover td.x {color: #000000;}
 
 .preview-container #bookCardFormat {
     margin: auto;
-    padding-top: 2rem;
-    padding-bottom: 5rem;
+    padding-top: 1rem;
+    padding-bottom: 4rem;
 }
 
 .preview-container .page {
@@ -412,7 +412,7 @@ tr:hover td.x {color: #000000;}
 
 #bookCardFormat table {
     background-color: #fff;
-    border: 0.04cm solid black;
+    border: 0.07cm solid black;
     border-collapse: separate;
     border-spacing: 0;
     padding: 0;
