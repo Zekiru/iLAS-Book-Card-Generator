@@ -10,7 +10,9 @@ const dataPagination = document.getElementById('dataPagination');
 const selectPagination = document.getElementById('selectedPagination');
 const searchInput = document.getElementById('search-bar');
 
-let dataHeaders = ['Acession number', 'Class', 'Author', 'Title of the Book'];
+const dataHeaders = ['Acession number', 'Class', 'Author', 'Title of the Book'];
+const headerText = ['ACC NO', 'CALL NO', 'AUTHOR', 'TITLE']; 
+
 let bookObjects = [];
 let currentBookObjects = [];
 let currentBookSelect = [];
@@ -257,7 +259,7 @@ function loadTable(objects) {
     tr.appendChild(th);
     dataHeaders.forEach((key) => {
         var th = document.createElement('th');
-        th.innerText = key;
+        th.innerText = headerText[dataHeaders.indexOf(key)];
         tr.appendChild(th);
     })
     dataTable.appendChild(tr);
@@ -423,7 +425,7 @@ function fetchUploadedData() {
             const json = tsvToJSON(contents);
 
             if (!Object.keys(json[0]).includes(dataHeaders[0])) {
-                fetchError("Remote", "Unreadable Data.");
+                fetchError("Upload", "Unreadable Data.");
                 return;
             };
         
@@ -441,7 +443,7 @@ function fetchUploadedData() {
                 };
                 xhr.send(JSON.stringify(json));
             } catch (error) {
-                fetchError("Remote", "XMLHttp Request Error.");
+                fetchError("Upload", "XMLHttp Request Error.");
             }
         };
         reader.readAsText(file);
@@ -453,7 +455,7 @@ function fetchUploadedData() {
 function fetchError(type, error) {
     console.log(type + " Data Fetch Error: " + error);
     
-    if (type == "Remote") fetchLocalData();
+    if (type != "Local") fetchLocalData();
 }
 
 function tsvToJSON(tsv) {
@@ -638,7 +640,7 @@ function loadBookCard(book) {
 
 
     const tableHeight = table.offsetHeight;
-    const containerHeight = page.offsetHeight - (page.offsetHeight * 0.12) - mainContent.offsetHeight;
+    const containerHeight = page.offsetHeight - (page.offsetHeight * 0.1) - mainContent.offsetHeight;
 
     if (tableHeight > containerHeight) {
         // calculate how many rows have overflowed
