@@ -356,7 +356,9 @@ async function fetchLocalData() {
         selectNone();
 
         json.forEach((book) => {
-            bookObjects.push(new Book(book));
+            if (book[dataHeaders[0]] != '') {
+                bookObjects.push(new Book(book));
+            }
         })
 
         bookObjects = bookObjects.sort(function(a, b){return a.id - b.id});
